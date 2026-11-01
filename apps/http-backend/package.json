@@ -9,12 +9,20 @@
     "dev": "pnpm run build  && pnpm run start"
   },
   "dependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "@types/express": "^5.0.6",
-    "express": "^5.3.0"
+    "cookie-parser": "^1.4.7",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.6.7"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/express": "^5.0.6",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/backend-packages" : "workspace:*"
+  }
 }

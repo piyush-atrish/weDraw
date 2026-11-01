@@ -1,0 +1,24 @@
+{
+  "name": "@repo/backend-packages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./jwt.utils": "./src/utils/jwt.utils.ts"
+  },
+  "dependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "26.4.1"
+  }
+}

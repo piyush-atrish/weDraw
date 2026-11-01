@@ -9,12 +9,17 @@
     "dev": "pnpm run build  && pnpm run start"
   },
   "dependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "@types/ws": "^8.18.2",
-    "ws": "^8.22.0"
+    "ws": "^8.22.0",
+    "jsonwebtoken": "^9.0.3"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.18.2",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/backend-packages" : "workspace:*"
+  }
 }
