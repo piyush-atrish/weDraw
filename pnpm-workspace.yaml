@@ -2,4 +2,5 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
-  node: set this to true or false
+  '@prisma/engines': true
+  prisma: true
