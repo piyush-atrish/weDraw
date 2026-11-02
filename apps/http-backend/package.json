@@ -23,6 +23,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/express": "^5.0.6",
     "@repo/typescript-config": "workspace:*",
-    "@repo/backend-packages" : "workspace:*"
+    "@repo/backend-packages" : "workspace:*",
+    "@repo/db" : "workspace:*"
   }
 }

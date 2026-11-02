@@ -2,25 +2,28 @@ import { Router } from "express";
 import type { Request , Response ,  NextFunction } from "express";
 import { credSchema } from "../validators/auth.validator.js";
 import { createToken } from "@repo/backend-packages/jwt.utils";
+import { createUser } from "../dao/user.dao.js";
 
 export const userRouter : Router = Router();
 
 userRouter.post('/signup' , async(req : Request , res : Response , next : NextFunction)=>{
     const{email,userName,password} = req.body;
+    const userData = {
+        email,
+        userName,
+        password
+    };
     try{
-        const response = credSchema.safeParse({
-            email,
-            userName,
-            password
-        });
+        const response = credSchema.safeParse(userData);
         if(!response.success){
-            console.log(response.error.issues.map(issue => issue.message));
+            console.log( response.error.issues.map(issue => issue.message));
             res.status(401).json({
                 message:"provide proper creds"
             });
         }
 
-        //create user in database
+        await createUser(userData);
+        
         res.status(200).json({
             message : "user signed up!"
         });

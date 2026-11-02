@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/userRoutes.js";
 import { roomRouter } from "./routes/roomRoutes.js";
 import { globalErrorHandler } from "./middlewares/errorHandler.js";
+import { prisma } from "@repo/db";
 
 const app = express();
 
@@ -14,6 +15,17 @@ app.use('/api/v1/user' , userRouter);
 
 app.use(globalErrorHandler);
 
-app.listen(3001,()=>{
-    console.log("http-backend server running on port 3001...");
-})
+const main = async()=>{
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log("Successfully connected to database");
+    app.listen(3001, () => {
+      console.log("Server is running on port 3001...");
+    });
+  } catch (error) {
+    console.error("Database connection failed. Aborting startup.", error);
+    process.exit(1);
+  }
+}
+
+main();

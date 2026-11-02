@@ -4,7 +4,7 @@
   "globalEnv": ["DATABASE_URL"],
   "tasks": {
     "build": {
-     "dependsOn": ["^build", "^db:generate"],
+     "dependsOn": ["db:generate", "^db:generate", "^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
@@ -15,6 +15,7 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "dependsOn": ["db:generate", "^db:generate", "^build"],
       "cache": false,
       "persistent": true
     },
