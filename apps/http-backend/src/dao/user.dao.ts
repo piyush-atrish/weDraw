@@ -1,6 +1,7 @@
 import {prisma} from "@repo/db";
 import { AppError } from "../utils/AppError.js";
 import bcrypt from "bcrypt";
+import { isUniqueViolation } from "../utils/prismaErrors.js";
 
 interface userData{
     email : string
@@ -14,18 +15,18 @@ interface signInData {
     password: string;
 }
 
-export const createUser = async(userData : userData)=>{
-        try{
-            userData.password = await bcrypt.hash(userData.password,10);
-            await prisma.user.create({
-                data: userData
-            });
-        }
-        catch(e){
-            console.log(e);
-            throw new AppError("error while registering user in database" , 500);
-        }
-}
+export const createUser = async (userData: userData) => {
+    try {
+        userData.password = await bcrypt.hash(userData.password, 10);
+        await prisma.user.create({
+            data : userData
+        });
+    } catch (e) {
+        if (isUniqueViolation(e)) throw new AppError("Email already registered", 409);
+        console.error(e);
+        throw new AppError("error while registering user in database", 500);
+    }
+};
 
 
 export const userSignIn = async (signInData: signInData) => {
@@ -53,5 +54,20 @@ export const userSignIn = async (signInData: signInData) => {
         }
         console.error("Database error during sign-in:", e);
         throw new AppError("Error while signing in", 500);
+    }
+};
+
+export const getUserById = async (id: number) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id },
+            select: { id: true, email: true, userName: true },
+        });
+        if (!user) throw new AppError("User not found", 401);
+        return user;
+    } catch (e) {
+        if (e instanceof AppError) throw e;
+        console.error(e);
+        throw new AppError("Error while fetching user", 500);
     }
 };

@@ -8,7 +8,7 @@ const rooms = new RoomManager();
 const alive = new WeakMap<WebSocket, boolean>();
 
 wss.on("connection", (ws, request) => {
-  const userId = authenticate(request.url);
+  const userId = authenticate(request);
   if (userId === null) {
     ws.close(1008, "Unauthorized");
     return;

@@ -11,8 +11,13 @@ export const passwordSchema = z.string()
 export const credSchema = z.object({
     email: z.email({ message: "Invalid email format" }),
     password: passwordSchema,
-    userName: z.string().max(50),
+    userName: z.string().min(1, { message: "User name is required" }).max(50),
 }).refine((data) => !data.password.includes(data.userName), {
     message: "Password cannot contain your user name",
     path: ["password"]
+});
+
+export const signInSchema = z.object({
+    email: z.email({ message: "Invalid email format" }),
+    password: z.string().min(1, { message: "Password is required" }),
 });

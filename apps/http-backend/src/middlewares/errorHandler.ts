@@ -13,9 +13,6 @@ export const globalErrorHandler = (
     if (err instanceof AppError) {
         statusCode = err.statusCode;
         message = err.message;
-        if (err.message === "User not found with this phone number" || err.message === "Invalid password") {
-        message = "Incorrect phone number or password";
-    }
     }
 
     res.status(statusCode).json({

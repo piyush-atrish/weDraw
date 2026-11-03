@@ -14,13 +14,16 @@ export const userAuth = (req: Request, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies.token;
         if (!token) throw new AppError("Token Not Provided", 401);
-        
-        const jwtKey: string | undefined = process.env.JWT_USER;
+
+        const jwtKey = process.env.JWT_USER;
         if (!jwtKey) throw new Error("missing jwt key");
-        
-        const userId = verifyToken(token, jwtKey);
-        req.userId = userId;
-        
+
+        try {
+            req.userId = verifyToken(token, jwtKey);
+        } catch {
+            throw new AppError("Invalid or expired token", 401);
+        }
+
         next();
     } catch (e) {
         next(e);

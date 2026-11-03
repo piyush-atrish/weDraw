@@ -4,8 +4,14 @@ import { userRouter } from "./routes/userRoutes.js";
 import { roomRouter } from "./routes/roomRoutes.js";
 import { globalErrorHandler } from "./middlewares/errorHandler.js";
 import { prisma } from "@repo/db";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(cookieParser());
