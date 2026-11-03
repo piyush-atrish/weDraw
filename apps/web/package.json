@@ -18,11 +18,16 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "26.4.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
+    "autoprefixer": "^10.6.2",
     "eslint": "10.9.1",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^4.3.3",
     "typescript": "7.0.2"
   }
 }
