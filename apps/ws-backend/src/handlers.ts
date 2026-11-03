@@ -49,8 +49,12 @@ export const handleMessage = async (ws: WebSocket, raw: string, rooms: RoomManag
       await prisma.chat.create({
         data: { roomId: msg.roomId, userId, message: msg.message },
       });
+      const chat = await prisma.chat.create({
+        data: { roomId: msg.roomId, userId, message: msg.message },
+      });
       rooms.broadcast(msg.roomId, {
         type: "chat",
+        id: chat.id,
         roomId: msg.roomId,
         from: userId,
         message: msg.message,
