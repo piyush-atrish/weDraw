@@ -103,16 +103,25 @@ importers:
 
   apps/ws-backend:
     dependencies:
+      dotenv:
+        specifier: ^18.0.9
+        version: 18.0.9
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
       ws:
         specifier: ^8.22.0
         version: 8.22.1
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@repo/backend-packages':
         specifier: workspace:*
         version: link:../../packages/backend-packages
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config

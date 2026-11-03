@@ -9,17 +9,20 @@
     "dev": "pnpm run build  && pnpm run start"
   },
   "dependencies": {
+    "dotenv": "^18.0.9",
+    "jsonwebtoken": "^9.0.3",
     "ws": "^8.22.0",
-    "jsonwebtoken": "^9.0.3"
+    "zod": "^4.6.7"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/ws": "^8.18.2",
+    "@repo/backend-packages": "workspace:*",
+    "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/backend-packages" : "workspace:*"
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.18.2"
   }
 }
