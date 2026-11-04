@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 
 interface Client {
   userId: number;
+  userName: Promise<string>;
   rooms: Set<number>;
 }
 
@@ -9,8 +10,23 @@ export class RoomManager {
   private clients = new Map<WebSocket, Client>();
   private rooms = new Map<number, Set<WebSocket>>();
 
-  addClient(ws: WebSocket, userId: number) {
-    this.clients.set(ws, { userId, rooms: new Set() });
+  addClient(ws: WebSocket, userId: number, userName: Promise<string>) {
+    this.clients.set(ws, { userId, userName, rooms: new Set() });
+  }
+
+  getUserName(ws: WebSocket) {
+  return this.clients.get(ws)?.userName;
+  }
+
+  closeRoom(roomId: number, payload: unknown) {
+  const members = this.rooms.get(roomId);
+  if (!members) return;
+  const data = JSON.stringify(payload);
+  for (const ws of members) {
+    this.clients.get(ws)?.rooms.delete(roomId);
+    if (ws.readyState === WebSocket.OPEN) ws.send(data);
+  }
+  this.rooms.delete(roomId);
   }
 
   removeClient(ws: WebSocket) {

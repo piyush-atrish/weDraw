@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { authenticate } from "./auth.js";
 import { RoomManager } from "./RoomManager.js";
 import { handleMessage } from "./handlers.js";
+import { prisma } from "@repo/db";
 
 const wss = new WebSocketServer({ port: 8080 });
 const rooms = new RoomManager();
@@ -14,7 +15,13 @@ wss.on("connection", (ws, request) => {
     return;
   }
 
-  rooms.addClient(ws, userId);
+  const userName = prisma.user
+  .findUnique({ where: { id: userId }, select: { userName: true } })
+  .then((u) => u?.userName ?? `User #${userId}`)
+  .catch(() => `User #${userId}`);
+
+  rooms.addClient(ws, userId, userName);
+  
   alive.set(ws, true);
 
   ws.on("pong", () => alive.set(ws, true));

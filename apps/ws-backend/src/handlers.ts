@@ -40,27 +40,44 @@ export const handleMessage = async (ws: WebSocket, raw: string, rooms: RoomManag
 
   }
 
-  else if(msg.type == "chat"){
+  else if (msg.type == "chat") {
+    if (!rooms.isInRoom(ws, msg.roomId)) {
+      return reply(ws, { type: "error", error: "Join the room first" });
+    }
 
-      if (!rooms.isInRoom(ws, msg.roomId)) {
-        return reply(ws, { type: "error", error: "Join the room first" });
-      }
-      
-      await prisma.chat.create({
-        data: { roomId: msg.roomId, userId, message: msg.message },
-      });
-      const chat = await prisma.chat.create({
-        data: { roomId: msg.roomId, userId, message: msg.message },
-      });
-      rooms.broadcast(msg.roomId, {
-        type: "chat",
-        id: chat.id,
-        roomId: msg.roomId,
-        from: userId,
-        message: msg.message,
-      });
-      return;
+    
+    const chat = await prisma.chat.create({
+      data: { roomId: msg.roomId, userId, message: msg.message },
+    });
 
+    rooms.broadcast(msg.roomId, {
+      type: "chat",
+      id: chat.id,
+      roomId: msg.roomId,
+      from: userId,
+      fromName: await rooms.getUserName(ws),
+      message: msg.message,
+    });
+    return;
   }
+
+  else if (msg.type === "delete_room") {
+      const room = await prisma.room.findUnique({
+        where: { id: msg.roomId },
+        select: { adminId: true },
+      });
+      if (!room) return reply(ws, { type: "error", error: "Room not found" });
+      if (room.adminId !== userId) {
+        return reply(ws, { type: "error", error: "Only the room admin can delete this room" });
+      }
+
+      await prisma.$transaction([
+        prisma.chat.deleteMany({ where: { roomId: msg.roomId } }),
+        prisma.room.delete({ where: { id: msg.roomId } }),
+      ]);
+
+      rooms.closeRoom(msg.roomId, { type: "room_deleted", roomId: msg.roomId });
+      return;
+}
 
 }

@@ -7,6 +7,7 @@ import { useSocket } from "./useSocket";
 export interface ChatMessage {
   id: number;
   userId: number;
+  userName: string;
   message: string;
 }
 
@@ -14,10 +15,10 @@ export function useRoomChat(roomId: number) {
   const { status, send, subscribe } = useSocket();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [joined, setJoined] = useState(false);
+  const [roomDeleted, setRoomDeleted] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Merge by id so history and live messages can never duplicate each other
   const addMessages = useCallback((incoming: ChatMessage[]) => {
     setMessages((prev) => {
       const byId = new Map(prev.map((m) => [m.id, m]));
@@ -26,7 +27,7 @@ export function useRoomChat(roomId: number) {
     });
   }, []);
 
-  // Live events
+
   useEffect(
     () =>
       subscribe((msg) => {
@@ -39,7 +40,15 @@ export function useRoomChat(roomId: number) {
             break;
           case "chat":
             if (msg.roomId === roomId) {
-              addMessages([{ id: msg.id, userId: msg.from, message: msg.message }]);
+              addMessages([
+                { id: msg.id, userId: msg.from, userName: msg.fromName, message: msg.message },
+              ]);
+            }
+            break;
+          case "room_deleted":
+            if (msg.roomId === roomId) {
+              setMessages([]);
+              setRoomDeleted(true);
             }
             break;
           case "error":
@@ -50,7 +59,7 @@ export function useRoomChat(roomId: number) {
     [subscribe, roomId, addMessages],
   );
 
-  // Server-side room membership is per connection, so (re)join every time the socket opens
+
   useEffect(() => {
     if (status !== "open") return;
     send({ type: "join_room", roomId });
@@ -60,7 +69,17 @@ export function useRoomChat(roomId: number) {
     };
   }, [status, roomId, send]);
 
-  // History: fetched after joining so no live message is missed; refetched after a reconnect to fill any gap
+
+  useEffect(() => {
+    if (status !== "open" || joined) return;
+    const timer = setTimeout(
+      () => setError("The server didn't respond to the join request. Is the ws-backend running?"),
+      8000,
+    );
+    return () => clearTimeout(timer);
+  }, [status, joined]);
+
+
   useEffect(() => {
     if (!joined) return;
     let cancelled = false;
@@ -87,5 +106,7 @@ export function useRoomChat(roomId: number) {
     [send, roomId],
   );
 
-  return { messages, status, joined, isLoadingHistory, error, sendMessage };
+  const deleteRoom = useCallback(() => send({ type: "delete_room", roomId }), [send, roomId]);
+
+  return { messages, status, joined, roomDeleted, isLoadingHistory, error, sendMessage, deleteRoom };
 }

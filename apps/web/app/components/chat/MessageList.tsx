@@ -31,7 +31,7 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
                   mine ? "bg-indigo-600 text-white" : "border border-gray-200 bg-white text-gray-900"
                 }`}
               >
-                {!mine && <p className="mb-0.5 text-xs font-medium text-gray-500">User #{m.userId}</p>}
+                {!mine && <p className="mb-0.5 text-xs font-medium text-gray-500">{m.userName}</p>}
                 <p className="whitespace-pre-wrap break-words">{m.message}</p>
               </div>
             </li>
