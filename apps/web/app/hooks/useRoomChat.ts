@@ -110,3 +110,5 @@ export function useRoomChat(roomId: number) {
 
   return { messages, status, joined, roomDeleted, isLoadingHistory, error, sendMessage, deleteRoom };
 }
+
+export type RoomChat = ReturnType<typeof useRoomChat>;
