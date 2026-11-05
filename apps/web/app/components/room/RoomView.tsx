@@ -15,7 +15,12 @@ export function RoomView({ roomId }: { roomId: number }) {
 
   return (
     <div className="fixed inset-0 overflow-hidden">
-      <DrawingCanvas />
+      <DrawingCanvas
+        roomId={roomId}
+        joined={chat.joined}
+        send={chat.send}
+        subscribe={chat.subscribe}
+      />
       <Sidebar label="Chat">
         <ChatPanel roomId={roomId} room={room} chat={chat} />
       </Sidebar>

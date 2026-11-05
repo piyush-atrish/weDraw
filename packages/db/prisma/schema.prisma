@@ -23,6 +23,7 @@ model Room {
   adminId     Int
   admin       User      @relation(fields:[adminId] , references:[id])
   chats       Chat[]
+  drawings    Drawing[]
 }
 
 
@@ -31,9 +32,20 @@ model Chat {
   roomId      Int       
   message     String
   userId      Int
-  room        Room      @relation(fields:[roomId] , references:[id])
+  createdAt   DateTime  @default(now())
+  room        Room      @relation(fields:[roomId] , references:[id] , onDelete: Cascade)
   user        User      @relation(fields:[userId] , references:[id])
+  @@index([roomId, createdAt])
 }
 
 
+model Drawing {
+  id        Int         @id @default(autoincrement())
+  shapeId   String   
+  data      String   
+  roomId    Int
+  createdAt DateTime    @default(now())
+  room      Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
+  @@unique([roomId, shapeId])
+}

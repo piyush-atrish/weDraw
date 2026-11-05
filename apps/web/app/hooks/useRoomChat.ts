@@ -108,7 +108,11 @@ export function useRoomChat(roomId: number) {
 
   const deleteRoom = useCallback(() => send({ type: "delete_room", roomId }), [send, roomId]);
 
-  return { messages, status, joined, roomDeleted, isLoadingHistory, error, sendMessage, deleteRoom };
+  return {
+  messages, status, joined, roomDeleted, isLoadingHistory, error,
+  sendMessage, deleteRoom,
+  send, subscribe,
+};
 }
 
 export type RoomChat = ReturnType<typeof useRoomChat>;

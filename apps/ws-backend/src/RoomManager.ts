@@ -60,10 +60,19 @@ export class RoomManager {
     return this.clients.get(ws)?.rooms.has(roomId) ?? false;
   }
 
-  broadcast(roomId: number, payload: unknown) {
+  broadcast(roomId: number, payload: unknown, except?: WebSocket) {
     const data = JSON.stringify(payload);
     for (const client of this.rooms.get(roomId) ?? []) {
-      if (client.readyState === WebSocket.OPEN) client.send(data);
+      if (client !== except && client.readyState === WebSocket.OPEN) client.send(data);
     }
   }
+
+  activeRoomIds() {
+  return [...this.rooms.keys()];
+  }
+
+  hasMembers(roomId: number) {
+    return (this.rooms.get(roomId)?.size ?? 0) > 0;
+  }
+  
 }

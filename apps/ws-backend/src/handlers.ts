@@ -20,17 +20,22 @@ export const handleMessage = async (ws: WebSocket, raw: string, rooms: RoomManag
   const userId = rooms.getUserId(ws);
   if (userId === undefined) return;
 
-  if(msg.type == "join_room"){
-
+  if (msg.type === "join_room") {
     const room = await prisma.room.findUnique({
-        where: { id: msg.roomId },
-        select: { id: true },
-      });
+      where: { id: msg.roomId },
+      select: {
+        id: true,
+        drawings: { orderBy: { id: "asc" }, select: { data: true } },
+      },
+    });
       if (!room) return reply(ws, { type: "error", error: "Room not found" });
-
       rooms.join(ws, room.id);
-      return reply(ws, { type: "joined", roomId: room.id });
-
+      reply(ws, { type: "joined", roomId: room.id });
+      return reply(ws, {
+        type: "drawings",
+        roomId: room.id,
+        shapes: room.drawings.map((d) => JSON.parse(d.data)),
+    });
   }
 
   else if(msg.type == "leave_room"){
@@ -78,6 +83,35 @@ export const handleMessage = async (ws: WebSocket, raw: string, rooms: RoomManag
 
       rooms.closeRoom(msg.roomId, { type: "room_deleted", roomId: msg.roomId });
       return;
+}
+
+if (msg.type === "draw") {
+  if (!rooms.isInRoom(ws, msg.roomId)) {
+    return reply(ws, { type: "error", error: "Join the room first" });
+  }
+
+  const { count } = await prisma.drawing.createMany({
+    data: [{ roomId: msg.roomId, shapeId: msg.shape.id, data: JSON.stringify(msg.shape) }],
+    skipDuplicates: true, // a retried draw with the same id is ignored
+  });
+  if (count === 0) return;
+
+  rooms.broadcast(msg.roomId, { type: "draw", roomId: msg.roomId, shape: msg.shape }, ws);
+  return;
+}
+
+if (msg.type === "erase") {
+  if (!rooms.isInRoom(ws, msg.roomId)) {
+    return reply(ws, { type: "error", error: "Join the room first" });
+  }
+
+  // Scoped by roomId so a client can never delete shapes belonging to another room
+  await prisma.drawing.deleteMany({
+    where: { roomId: msg.roomId, shapeId: { in: msg.shapeIds } },
+  });
+
+  rooms.broadcast(msg.roomId, { type: "erase", roomId: msg.roomId, shapeIds: msg.shapeIds }, ws);
+  return;
 }
 
 }

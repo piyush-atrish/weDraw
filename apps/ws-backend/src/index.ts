@@ -3,8 +3,9 @@ import { authenticate } from "./auth.js";
 import { RoomManager } from "./RoomManager.js";
 import { handleMessage } from "./handlers.js";
 import { prisma } from "@repo/db";
+import { startRoomCleanup } from "./cleanup.js";
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080, maxPayload: 512 * 1024 });
 const rooms = new RoomManager();
 const alive = new WeakMap<WebSocket, boolean>();
 
@@ -25,14 +26,23 @@ wss.on("connection", (ws, request) => {
   alive.set(ws, true);
 
   ws.on("pong", () => alive.set(ws, true));
+  let queue: Promise<void> = Promise.resolve();
   ws.on("message", (data) => {
-    handleMessage(ws, data.toString(), rooms).catch((err) => {
-      console.error(err);
-      ws.send(JSON.stringify({ type: "error", error: "Internal error" }));
-    });
+    const text = data.toString();
+    queue = queue
+      .then(() => handleMessage(ws, text, rooms))
+      .catch((err) => {
+        console.error(err);
+        ws.send(JSON.stringify({ type: "error", error: "Internal error" }));
+      });
   });
   ws.on("close", () => rooms.removeClient(ws));
   ws.on("error", console.error);
+  const stopCleanup = startRoomCleanup(rooms);
+  wss.on("close", () => {
+    clearInterval(heartbeat);
+    stopCleanup();
+  });
 });
 
 
