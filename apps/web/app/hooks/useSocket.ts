@@ -26,7 +26,12 @@ useEffect(() => {
 
   const connect = () => {
     setStatus(retries === 0 ? "connecting" : "reconnecting");
-    const socket = new WebSocket(WS_URL);
+    const url =
+      process.env.WS_URL ??
+      (process.env.NODE_ENV === "development"
+        ? "ws://localhost:8080"
+        : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+    const socket = new WebSocket(url);
     current = socket;
     socketRef.current = socket;
 

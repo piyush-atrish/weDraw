@@ -25,10 +25,10 @@ export function distToSegment(p: Point, a: Point, b: Point): number {
 
 function nearPath(p: Point, pts: Point[], tol: number, closed: boolean): boolean {
   const n = pts.length;
-  if (n === 1) return Math.hypot(p.x - pts[0].x, p.y - pts[0].y) <= tol;
+  if (n === 1) return Math.hypot(p.x - pts[0]!.x, p.y - pts[0]!.y) <= tol;
   const segments = closed ? n : n - 1;
   for (let i = 0; i < segments; i++) {
-    if (distToSegment(p, pts[i], pts[(i + 1) % n]) <= tol) return true;
+    if (distToSegment(p, pts[i]!, pts[(i + 1) % n]!) <= tol) return true;
   }
   return false;
 }

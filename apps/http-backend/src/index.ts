@@ -7,6 +7,10 @@ import { prisma } from "@repo/db";
 import cors from "cors";
 
 const app = express();
+const PORT = Number(process.env.PORT) || 3001;
+
+app.set("trust proxy", 1);
+
 
 app.use(cors({
   origin: process.env.FRONTEND_ORIGIN ?? "http://localhost:3000",
@@ -16,6 +20,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true });
+});
 app.use('/api/v1/user/room' , roomRouter);
 app.use('/api/v1/user' , userRouter);
 
@@ -25,9 +32,7 @@ const main = async()=>{
   try {
     await prisma.$queryRaw`SELECT 1`;
     console.log("Successfully connected to database");
-    app.listen(3001, () => {
-      console.log("Server is running on port 3001...");
-    });
+    app.listen(PORT, () => console.log(`http-backend listening on ${PORT}`));
   } catch (error) {
     console.error("Database connection failed. Aborting startup.", error);
     process.exit(1);

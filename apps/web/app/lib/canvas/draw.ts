@@ -17,9 +17,9 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape, alpha = 1
 
     case "triangle": {
       const [a, b, c] = trianglePoints(shape);
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.lineTo(c.x, c.y);
+      ctx.moveTo(a!.x, a!.y);
+      ctx.lineTo(b!.x, b!.y);
+      ctx.lineTo(c!.x, c!.y);
       ctx.closePath();
       break;
     }
@@ -51,19 +51,19 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape, alpha = 1
 
     case "pencil": {
       const pts = shape.points;
-      ctx.moveTo(pts[0].x, pts[0].y);
+      ctx.moveTo(pts[0]!.x, pts[0]!.y);
       if (pts.length < 3) {
         // One point draws a dot (round cap), two points a straight segment
         pts.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
-        if (pts.length === 1) ctx.lineTo(pts[0].x, pts[0].y);
+        if (pts.length === 1) ctx.lineTo(pts[0]!.x, pts[0]!.y);
       } else {
         // Curve through the midpoints so freehand strokes look smooth instead of jagged
         for (let i = 1; i < pts.length - 1; i++) {
-          const mid = { x: (pts[i].x + pts[i + 1].x) / 2, y: (pts[i].y + pts[i + 1].y) / 2 };
-          ctx.quadraticCurveTo(pts[i].x, pts[i].y, mid.x, mid.y);
+          const mid = { x: (pts[i]!.x + pts[i + 1]!.x) / 2, y: (pts[i]!.y + pts[i + 1]!.y) / 2 };
+          ctx.quadraticCurveTo(pts[i]!.x, pts[i]!.y, mid.x, mid.y);
         }
         const last = pts[pts.length - 1];
-        ctx.lineTo(last.x, last.y);
+        ctx.lineTo(last!.x, last!.y);
       }
       break;
     }

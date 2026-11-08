@@ -5,7 +5,10 @@ import { handleMessage } from "./handlers.js";
 import { prisma } from "@repo/db";
 import { startRoomCleanup } from "./cleanup.js";
 
-const wss = new WebSocketServer({ port: 8080, maxPayload: 512 * 1024 });
+const wss = new WebSocketServer({
+  port: Number(process.env.PORT) || 8080,
+  maxPayload: 512 * 1024,
+});
 const rooms = new RoomManager();
 const alive = new WeakMap<WebSocket, boolean>();
 
