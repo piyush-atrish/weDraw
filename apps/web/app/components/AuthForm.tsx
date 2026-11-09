@@ -17,6 +17,7 @@ export interface AuthField<N extends string> {
 interface AuthFormProps<N extends string> {
   title: string;
   subtitle?: string;
+  beforeForm?: ReactNode; // content shown above the fields, like the Google button
   fields: readonly AuthField<N>[];
   submitLabel: string;
   onSubmit: (values: Record<N, string>) => Promise<void>;
@@ -26,6 +27,7 @@ interface AuthFormProps<N extends string> {
 export function AuthForm<N extends string>({
   title,
   subtitle,
+  beforeForm,
   fields,
   submitLabel,
   onSubmit,
@@ -55,7 +57,9 @@ export function AuthForm<N extends string>({
     <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
       <Heading title={title} subtitle={subtitle} size="md" />
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+      {beforeForm && <div className="mt-6">{beforeForm}</div>}
+
+      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
         {fields.map((f) => (
           <Input
             key={f.name}

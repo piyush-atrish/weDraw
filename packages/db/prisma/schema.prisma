@@ -7,14 +7,29 @@ datasource db {
   provider = "postgresql"
 }
 
-model User { 
-  id         Int      @id @default(autoincrement()) 
-  email      String   @unique
-  userName   String?
-  password   String
-  rooms      Room[]
-  chats      Chat[]
-} 
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique           
+  userName      String?                    
+  userNameKey   String?  @unique           
+  password      String?                   
+  emailVerified Boolean  @default(false)
+  googleId      String?  @unique
+  rooms         Room[]
+  chats         Chat[]
+}
+
+model EmailOtp {
+  id        Int      @id @default(autoincrement())
+  email     String
+  purpose   String  
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
 
 model Room {
   id          Int       @id @default(autoincrement())

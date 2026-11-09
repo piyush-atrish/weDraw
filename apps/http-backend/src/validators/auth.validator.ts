@@ -8,16 +8,39 @@ export const passwordSchema = z.string()
     .regex(/[0-9]/, { message: "Must contain at least one number" })
     .regex(/[\W_]/, { message: "Must contain at least one special character (e.g., !@#$)" });
 
-export const credSchema = z.object({
-    email: z.email({ message: "Invalid email format" }),
+export const emailSchema = z.string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ message: "Invalid email format" }));
+
+export const userNameSchema = z.string()
+    .trim()
+    .min(3, { message: "Username must be at least 3 characters" })
+    .max(30, { message: "Username cannot exceed 30 characters" })
+    .regex(/^[A-Za-z0-9_.]+$/, { message: "Username can only use letters, numbers, dots and underscores" });
+
+const contains = (password: string, term: string) =>
+    term.length >= 3 && password.toLowerCase().includes(term.toLowerCase());
+
+export const signUpSchema = z.object({
+    email: emailSchema,
+    userName: userNameSchema,
     password: passwordSchema,
-    userName: z.string().min(1, { message: "User name is required" }).max(50),
-}).refine((data) => !data.password.includes(data.userName), {
-    message: "Password cannot contain your user name",
-    path: ["password"]
-});
+}).refine(
+    (d) => !contains(d.password, d.userName) && !contains(d.password, d.email.split("@")[0]!),
+    { message: "Password cannot contain your username or the first part of your email", path: ["password"] },
+);
 
 export const signInSchema = z.object({
-    email: z.email({ message: "Invalid email format" }),
+    email: emailSchema,
     password: z.string().min(1, { message: "Password is required" }),
 });
+
+export const otpRequestSchema = z.object({ email: emailSchema });
+
+export const otpVerifySchema = z.object({
+    email: emailSchema,
+    code: z.string().regex(/^\d{6}$/, { message: "Enter the 6-digit code" }),
+});
+
+export const googleSchema = z.object({ credential: z.string().min(1) });

@@ -15,12 +15,22 @@ interface SignupData {
   password: string;
 }
 
+export type AuthResult = { verificationRequired: false } | { verificationRequired: true; email: string };
+
+interface SessionResponse {
+  status: "ok" | "verification_required";
+  email?: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  signup: (data: SignupData) => Promise<AuthResult>;
+  requestOtp: (email: string) => Promise<void>;
+  verifyOtp: (email: string, code: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -43,27 +53,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-const login = useCallback(async (email: string, password: string) => {
-  await api.post("/user/signin", { email, password });
-  setUser(await fetchMe());
-}, []);
+  const handleSession = useCallback(async (data: SessionResponse): Promise<AuthResult> => {
+    if (data.status === "verification_required" && data.email) {
+      return { verificationRequired: true, email: data.email };
+    }
+    setUser(await fetchMe());
+    return { verificationRequired: false };
+  }, []);
 
-const signup = useCallback(
-  async (data: SignupData) => {
-    await api.post("/user/signup", data);
-    await login(data.email, data.password);
-  },
-  [login],
-);
+  const login = useCallback(
+    async (email: string, password: string) =>
+      handleSession((await api.post<SessionResponse>("/user/signin", { email, password })).data),
+    [handleSession],
+  );
 
-const logout = useCallback(async () => {
-  await api.post("/user/logout");
-  setUser(null);
-}, []);
+  const signup = useCallback(
+    async (data: SignupData) => handleSession((await api.post<SessionResponse>("/user/signup", data)).data),
+    [handleSession],
+  );
+
+  const requestOtp = useCallback(async (email: string) => {
+    await api.post("/user/otp/request", { email });
+  }, []);
+
+  const verifyOtp = useCallback(
+    async (email: string, code: string) => {
+      await handleSession((await api.post<SessionResponse>("/user/otp/verify", { email, code })).data);
+    },
+    [handleSession],
+  );
+
+  const loginWithGoogle = useCallback(
+    async (credential: string) => {
+      await handleSession((await api.post<SessionResponse>("/user/google", { credential })).data);
+    },
+    [handleSession],
+  );
+
+  const logout = useCallback(async () => {
+    await api.post("/user/logout");
+    setUser(null);
+  }, []);
 
   const value = useMemo(
-    () => ({ user, isLoggedIn: user !== null, isLoading, login, signup, logout }),
-    [user, isLoading, login, signup, logout],
+    () => ({
+      user,
+      isLoggedIn: user !== null,
+      isLoading,
+      login,
+      signup,
+      requestOtp,
+      verifyOtp,
+      loginWithGoogle,
+      logout,
+    }),
+    [user, isLoading, login, signup, requestOtp, verifyOtp, loginWithGoogle, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
