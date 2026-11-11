@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
 import type { ClientMessage, ServerMessage } from "../lib/socketTypes";
 
-const WS_URL = process.env.WS_URL ?? "ws://localhost:8080";
 const MAX_BACKOFF_MS = 15_000;
 
 export type SocketStatus = "connecting" | "open" | "reconnecting" | "closed" | "unauthorized";
@@ -27,10 +26,9 @@ useEffect(() => {
   const connect = () => {
     setStatus(retries === 0 ? "connecting" : "reconnecting");
     const url =
-      process.env.WS_URL ??
-      (process.env.NODE_ENV === "development"
+      process.env.NODE_ENV === "development"
         ? "ws://localhost:8080"
-        : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+        : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
     const socket = new WebSocket(url);
     current = socket;
     socketRef.current = socket;

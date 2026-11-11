@@ -11,7 +11,8 @@ export class ApiError extends Error {
 
 
 export const api = axios.create({
-  baseURL: process.env.API_URL ?? "http://localhost:3001/api/v1",
+  baseURL:
+  process.env.NODE_ENV === "development" ? "http://localhost:3001/api/v1" : "/api/v1",
   withCredentials: true,
   timeout: 10_000,
 });
