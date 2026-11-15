@@ -10,14 +10,14 @@ echo "==> Building"
 pnpm exec turbo run build --concurrency=1 --ui=stream
 
 echo "==> Applying database migrations"
-pnpm --filter @repo/db db:deploy
+pnpm --filter @repo/db db:deploy 2>&1 | grep -v '^Datasource'
 
 echo "==> Restarting apps"
 pm2 startOrReload "$HOME/ecosystem.config.cjs"
 
 echo "==> Health check"
 for i in $(seq 1 20); do
-  if curl -fsS http://localhost:3001/api/health > /dev/null && curl -fsS -o /dev/null http://localhost:3000; then
+  if curl -fs http://localhost:3001/api/health > /dev/null && curl -fs -o /dev/null http://localhost:3000; then
     echo "Deploy OK"
     exit 0
   fi
